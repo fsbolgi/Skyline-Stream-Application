@@ -27,7 +27,7 @@ bool check_rest(int i, int *t, Node **DB_rest, Node **DB_sky, int m, int *insert
             // has expired, rest node should be moved from rest list to skyline
             if (cur_node_rest->insert <= i)
             {
-                push_node(DB_sky, cur_node_rest->tuple, expire);
+                push_node(DB_sky, cur_node_rest->tuple, expire, *insert);
                 delete_node(&prev_node_rest, &cur_node_rest, DB_rest);
             }
             // Otherwise go to the next element in rest list
