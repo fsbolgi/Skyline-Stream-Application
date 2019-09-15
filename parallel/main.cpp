@@ -34,12 +34,6 @@ int main(int argc, char *argv[])
     /******** GENERATE TUPLE (F1) ********/
 
     stdQueue<int> *coll_to_gen = new stdQueue<int>();
-    stdQueue<int *> *gen_to_disp = new stdQueue<int *>();
-
-    thread gen_thread(generator, n, m, w, k, verbose, coll_to_gen, gen_to_disp);
-
-    /******** SENT TUPLE TO SKY WORKERS (F2a) ********/
-
     vector<stdQueue<int *> *> disp_to_sky(nw_sky);
     vector<stdQueue<Message *> *> sky_to_conn(nw_sky);
 
@@ -49,7 +43,7 @@ int main(int argc, char *argv[])
         sky_to_conn[i] = new stdQueue<Message *>();
     }
 
-    thread sky_dispatcher(dispatch_sky, nw_sky, gen_to_disp, disp_to_sky);
+    thread gen_thread(generator, n, m, w, k, nw_sky, verbose, coll_to_gen, disp_to_sky);  
 
     /******** SCAN SKYLINE LIST (F2) ********/
 
@@ -93,7 +87,6 @@ int main(int argc, char *argv[])
     /******** JOIN THREADS ********/
 
     gen_thread.join();
-    sky_dispatcher.join();
     for (int i = 0; i < nw_sky; i++)
     {
         sky_workers.back().join();

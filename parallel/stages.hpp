@@ -19,9 +19,7 @@ void connect_sky_rest(int nw_sky, int nw_rest, std::vector<stdQueue<Message *> *
 
 bool check_skyline(Node **DB_sky, int m, stdQueue<int *> *inputQueue, stdQueue<Message *> *outputQueue);
 
-void dispatch_sky(int nw, stdQueue<int *> *inputQueue, std::vector<stdQueue<int *> *> outputQueues);
-
-void generator(int n, int m, int w, int k, bool verbose, stdQueue<int> *inputQueue, stdQueue<int *> *outputQueue);
+void generator(int n, int m, int w, int k, int nw_sky, bool verbose, stdQueue<int> *inputQueue, std::vector<stdQueue<int *> *> outputQueues);
 
 bool check_parameters(int argc, char *argv[]);
 

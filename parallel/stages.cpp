@@ -5,6 +5,53 @@ using namespace std;
 
 #define EOS NULL
 
+void print_sky_rest(vector<Node *> *DB_rest, vector<Node *> *DB_sky, int m, int i, int w, int k, int nw_sky, int nw_rest, bool verbose)
+{
+    if ((i >= w - 1) && verbose)
+    {
+        if ((i + 1 - w) % k == 0)
+        {
+            cout << "SKYLINE: ";
+            for (int j = 0; j < nw_sky; j++)
+            {
+                if (j > 0)
+                {
+                    cout << " - ";
+                }
+                print_node_list((*DB_sky)[j], m);
+            }
+            cout << "\nREST: ";
+            for (int j = 0; j < nw_rest; j++)
+            {
+                if (j > 0)
+                {
+                    cout << " - ";
+                }
+                print_node_list((*DB_rest)[j], m);
+            }
+            cout << "\n"
+                 << endl;
+        }
+    }
+}
+
+void print_window(int *t, deque<int *> *window, int m, int i, int w, int k, bool verbose)
+{
+    if (verbose)
+    {
+        window->push_front(t);
+    }
+    if ((i >= w - 1) && verbose)
+    {
+        if ((i + 1 - w) % k == 0)
+        {
+            cout << "WINDOW: ";
+            print_queue(*window, m);
+        }
+        window->pop_back();
+    }
+}
+
 void collector(vector<Node *> *DB_rest, vector<Node *> *DB_sky, int m, int w, int k, int nw_sky, int nw_rest, bool verbose, vector<stdQueue<Message *> *> inputQueues, stdQueue<int> *outputQueue)
 {
     Message *extracted = inputQueues[0]->pop();
@@ -201,49 +248,26 @@ bool check_skyline(Node **DB_sky, int m, stdQueue<int *> *inputQueue, stdQueue<M
     outputQueue->push(EOS);
 }
 
-void dispatch_sky(int nw_sky, stdQueue<int *> *inputQueue, vector<stdQueue<int *> *> outputQueues)
-{
-    int *extracted = inputQueue->pop();
-    while (extracted != EOS)
-    {
-        for (int i = 0; i < nw_sky; i++)
-        {
-            outputQueues[i]->push(extracted);
-        }
-        extracted = inputQueue->pop();
-    }
-    for (int i = 0; i < nw_sky; i++)
-    {
-        outputQueues[i]->push(EOS);
-    }
-}
-
 /* Given a length l, generate an array of random integers
 of length l. If verbose the random numbers are taken
 in the range [0-99] to better compare*/
-void generator(int n, int m, int w, int k, bool verbose, stdQueue<int> *inputQueue, stdQueue<int *> *outputQueue)
+void generator(int n, int m, int w, int k, int nw_sky, bool verbose, stdQueue<int> *inputQueue, vector<stdQueue<int *> *> outputQueues)
 {
     deque<int *> window;
     for (int i = 0; i < n; i++)
     {
         int *t = generate_tuple(m, verbose);
-        if (verbose)
+        print_window(t, &window, m, i, w, k, verbose);
+        for (int i = 0; i < nw_sky; i++)
         {
-            window.push_front(t);
+            outputQueues[i]->push(t);
         }
-        if ((i >= w - 1) && verbose)
-        {
-            if ((i + 1 - w) % k == 0)
-            {
-                cout << "WINDOW: ";
-                print_queue(window, m);
-            }
-            window.pop_back();
-        }
-        outputQueue->push(t);
         inputQueue->pop();
     }
-    outputQueue->push(EOS);
+    for (int i = 0; i < nw_sky; i++)
+    {
+        outputQueues[i]->push(EOS);
+    }
 }
 
 /* Check if the program is launched with the correct set of parameters */
