@@ -5,6 +5,13 @@
 #include <cstdlib>
 #include <deque>
 #include <tuple>
+#include <chrono>
+
+
+#include <mutex>
+#include <condition_variable>
+#include <vector>
+#include <thread>
 
 int *generate_tuple(int m, bool verbose);
 
