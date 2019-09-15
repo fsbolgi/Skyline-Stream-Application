@@ -3,7 +3,7 @@
 
 #include "./linked_list.hpp"
 
-bool check_rest(int i, int *t, Node **DB_rest, Node **DB_sky, int m, int *insert, int expire);
+bool check_rest(int i, int *t, Node **DB_rest, Node **DB_sky, int m, int *insert);
 
 bool check_skyline(int i, int *t, Node **DB_sky, int m, int *insert);
 
