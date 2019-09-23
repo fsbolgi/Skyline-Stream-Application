@@ -1,5 +1,7 @@
 # Execution File
 sequential/main
+parallel/main
+fastflow/main
 
 # Prerequisites
 *.d
