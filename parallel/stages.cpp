@@ -1,10 +1,11 @@
 #include "./stages.hpp"
-#include "./linked_list.hpp"
 
 using namespace std;
+using namespace std::chrono;
 
 #define EOS NULL
 
+/* Prints the current skyline and the rest list */
 void print_sky_rest(vector<Node *> *DB_rest, vector<Node *> *DB_sky, int m, int i, int w, int k, int nw_sky, int nw_rest, bool verbose)
 {
     if ((i >= w - 1) && verbose)
@@ -35,6 +36,7 @@ void print_sky_rest(vector<Node *> *DB_rest, vector<Node *> *DB_sky, int m, int 
     }
 }
 
+/* Prints current window */
 void print_window(int *t, deque<int *> *window, int m, int i, int w, int k, bool verbose)
 {
     if (verbose)
@@ -52,12 +54,17 @@ void print_window(int *t, deque<int *> *window, int m, int i, int w, int k, bool
     }
 }
 
+/* Collects results from rest list and prints it */
 void collector(vector<Node *> *DB_rest, vector<Node *> *DB_sky, int m, int w, int k, int nw_sky, int nw_rest, bool verbose, vector<stdQueue<Message *> *> inputQueues, stdQueue<int> *outputQueue)
 {
     Message *extracted = inputQueues[0]->pop();
+    system_clock::time_point start, stop;
+    long elapsed;
     int i = 0;
     while (extracted != EOS)
     {
+        start = high_resolution_clock::now();
+
         bool sky = (*extracted).sky;
         int max_ins = (*extracted).insert;
         for (int j = 1; j < nw_rest; j++)
@@ -82,48 +89,28 @@ void collector(vector<Node *> *DB_rest, vector<Node *> *DB_sky, int m, int w, in
             int rand = std::rand() % nw_rest;
             push_node(&(*DB_rest)[rand], (*extracted).tuple, i + w, max_ins);
         }
-        if ((i >= w - 1) && verbose)
-        {
-            if ((i + 1 - w) % k == 0)
-            {
-                cout << "SKYLINE: ";
-                for (int j = 0; j < nw_sky; j++)
-                {
-                    if (j > 0)
-                    {
-                        cout << " - ";
-                    }
-                    print_node_list((*DB_sky)[j], m);
-                }
-                cout << "\nREST: ";
-                for (int j = 0; j < nw_rest; j++)
-                {
-                    if (j > 0)
-                    {
-                        cout << " - ";
-                    }
-                    print_node_list((*DB_rest)[j], m);
-                }
-                cout << "\n"
-                     << endl;
-            }
-        }
+        print_sky_rest(DB_rest, DB_sky, m, i, w, k, nw_sky, nw_rest, verbose);
         (*extracted).sky = sky;
         (*extracted).insert = max_ins;
         outputQueue->push(1);
+        stop = high_resolution_clock::now();
+        elapsed += duration_cast<microseconds>(stop - start).count();
         extracted = inputQueues[0]->pop();
         i++;
     }
+    cout << "Time f4: " << (elapsed) << " micro sec" << endl;
 }
 
 /* Handles rest list */
-bool check_rest(Node **DB_rest, vector<Node *> *DB_sky, int nw_sky, int m, stdQueue<Message *> *inputQueue, stdQueue<Message *> *outputQueue)
+void check_rest(Node **DB_rest, vector<Node *> *DB_sky, int nw_sky, int m, stdQueue<Message *> *inputQueue, stdQueue<Message *> *outputQueue)
 {
     int i = 0;
-
     Message *extracted = inputQueue->pop();
+    system_clock::time_point start, stop;
+    long elapsed;
     while (extracted != EOS)
     {
+        start = high_resolution_clock::now();
         int insert = (*extracted).insert;
 
         Node *prev_node_rest = NULL;
@@ -160,19 +147,24 @@ bool check_rest(Node **DB_rest, vector<Node *> *DB_sky, int nw_sky, int m, stdQu
             }
         }
         outputQueue->push(extracted);
-
+        stop = high_resolution_clock::now();
+        elapsed += duration_cast<microseconds>(stop - start).count();
         extracted = inputQueue->pop();
         i++;
     }
+    cout << "Time f3: " << (elapsed) << " micro sec" << endl;
     outputQueue->push(EOS);
 }
 
+/* Node that takes the results from the skyline and forwards it to the rest */
 void connect_sky_rest(int nw_sky, int nw_rest, vector<stdQueue<Message *> *> inputQueues, vector<stdQueue<Message *> *> outputQueues)
 {
     Message *extracted = inputQueues[0]->pop();
-
+    system_clock::time_point start, stop;
+    long elapsed;
     while (extracted != EOS)
     {
+        start = high_resolution_clock::now();
         bool sky = (*extracted).sky;
         int max_ins = (*extracted).insert;
         for (int i = 1; i < nw_sky; i++)
@@ -193,8 +185,11 @@ void connect_sky_rest(int nw_sky, int nw_rest, vector<stdQueue<Message *> *> inp
         {
             outputQueues[i]->push(extracted);
         }
+        stop = high_resolution_clock::now();
+        elapsed += duration_cast<microseconds>(stop - start).count();
         extracted = inputQueues[0]->pop();
     }
+    cout << "Time f2a: " << (elapsed) << " micro sec" << endl;
     for (int i = 0; i < nw_rest; i++)
     {
         outputQueues[i]->push(EOS);
@@ -202,12 +197,15 @@ void connect_sky_rest(int nw_sky, int nw_rest, vector<stdQueue<Message *> *> inp
 }
 
 /* Handles skyline list */
-bool check_skyline(Node **DB_sky, int m, stdQueue<int *> *inputQueue, stdQueue<Message *> *outputQueue)
+void check_skyline(Node **DB_sky, int m, stdQueue<int *> *inputQueue, stdQueue<Message *> *outputQueue)
 {
     int i = 0;
     int *extracted = inputQueue->pop();
+    system_clock::time_point start, stop;
+    long elapsed;
     while (extracted != EOS)
     {
+        start = high_resolution_clock::now();
         int insert = 0;
         bool sky = true;
 
@@ -242,9 +240,12 @@ bool check_skyline(Node **DB_sky, int m, stdQueue<int *> *inputQueue, stdQueue<M
         mes.sky = sky;
         mes.insert = insert;
         outputQueue->push(&mes);
+        stop = high_resolution_clock::now();
+        elapsed += duration_cast<microseconds>(stop - start).count();
         extracted = inputQueue->pop();
         i++;
     }
+    cout << "Time f2: " << (elapsed) << " micro sec" << endl;
     outputQueue->push(EOS);
 }
 
@@ -254,16 +255,22 @@ in the range [0-99] to better compare*/
 void generator(int n, int m, int w, int k, int nw_sky, bool verbose, stdQueue<int> *inputQueue, vector<stdQueue<int *> *> outputQueues)
 {
     deque<int *> window;
+    system_clock::time_point start, stop;
+    long elapsed;
     for (int i = 0; i < n; i++)
     {
+        start = high_resolution_clock::now();
         int *t = generate_tuple(m, verbose);
         print_window(t, &window, m, i, w, k, verbose);
         for (int i = 0; i < nw_sky; i++)
         {
             outputQueues[i]->push(t);
         }
+        stop = high_resolution_clock::now();
+        elapsed += duration_cast<microseconds>(stop - start).count();
         inputQueue->pop();
     }
+    cout << "Time f1: " << (elapsed) << " micro sec" << endl;
     for (int i = 0; i < nw_sky; i++)
     {
         outputQueues[i]->push(EOS);
@@ -275,21 +282,23 @@ bool check_parameters(int argc, char *argv[])
 {
     bool error = false;
     // Check if there's the correct number of parameters
-    if (argc < 7)
+    if (argc < 9)
     {
-        std::cout << "Parameters are:\n "
+        std::cout << "Parameters are:\n"
                   << "1) Stream length (n)\n"
                   << "2) Tuple size (m)\n"
                   << "3) Window size (w)\n"
                   << "4) Sliding factor (k)\n"
                   << "5) Seed (s)\n"
-                  << "6) Verbose (0 = false)" << endl;
+                  << "6) Number of sky workers\n"
+                  << "7) Number of rest workers\n"
+                  << "8) Verbose (0 = false)" << endl;
         error = true;
     }
     // Check if parameters are positive integers
     for (int i = 1; i < argc - 1; i++)
     {
-        if (atoi(argv[i]) <= 0)
+        if (atoi(argv[i]) < 0)
         {
             std::cout << "Parameters must be all positive integers" << endl;
             error = true;

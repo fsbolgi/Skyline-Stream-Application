@@ -17,8 +17,8 @@ stages.o: stages.cpp stages.hpp
 	$(CXX) -c stages.cpp $(LDFLAGS) $(CXXFLAGS)  
 	@echo "Done Compiling Stages"
 
-linked_list.o: linked_list.cpp linked_list.hpp
-	$(CXX) -c linked_list.cpp $(LDFLAGS) $(CXXFLAGS)
+linked_list.o: ../linked_list.cpp ../linked_list.hpp
+	$(CXX) -c ../linked_list.cpp $(LDFLAGS) $(CXXFLAGS)
 	@echo "Done Compiling Stages"
 
 util.o: ../util.cpp ../util.hpp

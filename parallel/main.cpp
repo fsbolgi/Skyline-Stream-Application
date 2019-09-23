@@ -16,34 +16,27 @@ int main(int argc, char *argv[])
     int w = atoi(argv[3]);
     int k = atoi(argv[4]);
     int s = atoi(argv[5]);
-    int verbose = atoi(argv[6]);
-
-    int nw_sky = 4;
-    int nw_rest = 4;
+    int nw_sky = atoi(argv[6]);
+    int nw_rest = atoi(argv[7]);
+    int verbose = atoi(argv[8]);
 
     // Decide seed for random numbers
     std::srand(s);
 
-    // time spent in each phase
-    auto time_f1 = 0;
-    auto time_f2 = 0;
-    auto time_f3 = 0;
-    auto time_f4 = 0;
     system_clock::time_point start = std::chrono::high_resolution_clock::now();
 
     /******** GENERATE TUPLE (F1) ********/
 
     stdQueue<int> *coll_to_gen = new stdQueue<int>();
-    vector<stdQueue<int *> *> disp_to_sky(nw_sky);
+    vector<stdQueue<int *> *> gen_to_sky(nw_sky);
     vector<stdQueue<Message *> *> sky_to_conn(nw_sky);
 
     for (int i = 0; i < nw_sky; i++)
     {
-        disp_to_sky[i] = new stdQueue<int *>();
+        gen_to_sky[i] = new stdQueue<int *>();
         sky_to_conn[i] = new stdQueue<Message *>();
     }
-
-    thread gen_thread(generator, n, m, w, k, nw_sky, verbose, coll_to_gen, disp_to_sky);  
+    thread gen_thread(generator, n, m, w, k, nw_sky, verbose, coll_to_gen, gen_to_sky);
 
     /******** SCAN SKYLINE LIST (F2) ********/
 
@@ -53,7 +46,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < nw_sky; i++)
     {
         skylines[i] = NULL;
-        sky_workers.push_back(thread(check_skyline, &(skylines[i]), m, disp_to_sky[i], sky_to_conn[i]));
+        sky_workers.push_back(thread(check_skyline, &(skylines[i]), m, gen_to_sky[i], sky_to_conn[i]));
     }
 
     /******** CONNECT SKYLINE AND REST (F3a) ********/
@@ -102,7 +95,7 @@ int main(int argc, char *argv[])
 
     system_clock::time_point stop = std::chrono::high_resolution_clock::now();
     auto timex = duration_cast<microseconds>(stop - start).count();
-    cout << "Total " << (timex) << " micro sec" << endl;
+    cout << "Total: " << (timex) << " micro sec" << endl;
 
     return 0;
 }
