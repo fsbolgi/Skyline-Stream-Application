@@ -1,7 +1,27 @@
 #include "./stages.hpp"
-#include "./linked_list.hpp"
 
 using namespace std;
+
+/* Prints Window, Skyline and Rest */
+void print_lists(int i, int w, int m, int k, bool verbose, deque<int *> *window, Node *DB_sky, Node *DB_rest)
+{
+    if ((i >= w - 1) && verbose)
+    {
+        if ((i + 1 - w) % k == 0)
+        {
+            cout << "WINDOW: ";
+            print_queue(*window, m);
+            cout << "SKYLINE: ";
+            print_node_list(DB_sky, m);
+            cout << endl;
+            cout << "REST: ";
+            print_node_list(DB_rest, m);
+            cout << "\n"
+                 << endl;
+        }
+        window->pop_back();
+    }
+}
 
 /* Handles rest list */
 bool check_rest(int i, int *t, Node **DB_rest, Node **DB_sky, int m, int *insert)
@@ -91,7 +111,7 @@ bool check_parameters(int argc, char *argv[])
         error = true;
     }
     // Check if parameters are positive integers
-    for (int i = 1; i < argc-1; i++)
+    for (int i = 1; i < argc - 1; i++)
     {
         if (atoi(argv[i]) <= 0)
         {
@@ -101,7 +121,8 @@ bool check_parameters(int argc, char *argv[])
     }
 
     // verbose must be 0 or 1
-    if (atoi(argv[6]) < 0 || atoi(argv[6]) > 1) {
+    if (atoi(argv[6]) < 0 || atoi(argv[6]) > 1)
+    {
         std::cout << "Verbose is either 0 or 1" << endl;
         error = true;
     }

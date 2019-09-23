@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     system_clock::time_point start;
     system_clock::time_point stop;
 
-    system_clock::time_point startx = std::chrono::high_resolution_clock::now();
+    system_clock::time_point start_total = std::chrono::high_resolution_clock::now();
 
     // The window is stored in the queue
     deque<int *> window;
@@ -79,6 +79,8 @@ int main(int argc, char *argv[])
         stop = std::chrono::high_resolution_clock::now();
         time_f3 += duration_cast<microseconds>(stop - start).count();
 
+        /******** PUSH NEW TUPLE (F4) ********/
+
         // New tuple is inserted either in the skyline or in the rest list
         if (sky)
         {
@@ -89,37 +91,32 @@ int main(int argc, char *argv[])
             push_node(&DB_rest, t, expire, insert);
         }
 
-        /******** PRINT LISTS (F4) ********/
+        /******** PRINT LISTS (F5) ********/
 
         start = std::chrono::high_resolution_clock::now();
 
         // Wait until correct window and print only when necessary
-        if ((i >= w - 1) && verbose)
-        {
-            if ((i + 1 - w) % k == 0)
-            {
-                cout << "WINDOW: ";
-                print_queue(window, m);
-                cout << "SKYLINE: ";
-                print_node_list(DB_sky, m);
-                cout << "REST: ";
-                print_node_list(DB_rest, m);
-                cout << endl;
-            }
-            window.pop_back();
-        }
+        print_lists(i, w, m, k, verbose, &window, DB_sky, DB_rest);
+
         stop = std::chrono::high_resolution_clock::now();
         time_f4 += duration_cast<microseconds>(stop - start).count();
     }
 
     system_clock::time_point stopx = std::chrono::high_resolution_clock::now();
-    auto timex = duration_cast<microseconds>(stopx - startx).count();
+    auto timex = duration_cast<microseconds>(stopx - start_total).count();
+
+    // Print times
     cout << "Total: " << (timex) << " micro sec" << endl;
 
     cout << "Time f1: " << (time_f1) << " micro sec" << endl;
     cout << "Time f2: " << (time_f2) << " micro sec" << endl;
     cout << "Time f3: " << (time_f3) << " micro sec" << endl;
     cout << "Time f4: " << (time_f4) << " micro sec" << endl;
+
+    cout << "Mean f1: " << (time_f1 / n) << " micro sec" << endl;
+    cout << "Mean f2: " << (time_f2 / n) << " micro sec" << endl;
+    cout << "Mean f3: " << (time_f3 / n) << " micro sec" << endl;
+    cout << "Mean f4: " << (time_f4 / n) << " micro sec" << endl;
 
     return 0;
 }
