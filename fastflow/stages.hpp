@@ -3,9 +3,13 @@
 
 #include "../linked_list.hpp"
 
-bool check_rest(int i, int *t, Node **DB_rest, Node **DB_sky, int m, int *insert);
+void print_sky_rest(std::vector<Node *> *skylines, std::vector<Node *> *rests, int m, int i, int w, int k, int nw_sky, int nw_rest, bool verbose);
 
-bool check_skyline(int i, int *t, Node **DB_sky, int m, int *insert);
+void print_window(int *t, std::deque<int *> *window, int m, int i, int w, int k, bool verbose);
+
+void check_rest(int *t, int m, int i, std::vector<int> *insert_rest, int insert, std::vector<Node *> *rests, std::vector<Node *> *skylines, int nw_sky, long j);
+
+void check_skyline(int *t, int m, int i, std::vector<int> *insert_sky, int insert, std::vector<Node *> *skylines, std::vector<bool> *sky_arr, long j);
 
 bool check_parameters(int argc, char *argv[]);
 

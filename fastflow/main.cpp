@@ -20,10 +20,9 @@ int main(int argc, char *argv[])
     int w = atoi(argv[3]);
     int k = atoi(argv[4]);
     int s = atoi(argv[5]);
-    int verbose = atoi(argv[6]);
-
-    int nw_sky = 4;
-    int nw_rest = 4;
+    int nw_sky = atoi(argv[6]);
+    int nw_rest = atoi(argv[7]);
+    int verbose = atoi(argv[8]);
 
     // Decide seed for random numbers
     srand(s);
@@ -69,20 +68,8 @@ int main(int argc, char *argv[])
         stop = std::chrono::high_resolution_clock::now();
         time_f1 += duration_cast<microseconds>(stop - start).count();
 
-        if (verbose)
-        {
-            window.push_front(t);
-        }
+        print_window(t, &window, m, i, w, k, verbose);
 
-        if ((i >= w - 1) && verbose)
-        {
-            if ((i + 1 - w) % k == 0)
-            {
-                std::cout << "WINDOW: ";
-                print_queue(window, m);
-            }
-            window.pop_back();
-        }
         int expire = i + w;
         int insert = 0;
 
@@ -90,44 +77,16 @@ int main(int argc, char *argv[])
 
         start = std::chrono::high_resolution_clock::now();
 
-        // Check each element in the skyline list
-
         vector<bool> sky_arr(nw_sky);
         vector<int> insert_sky(nw_sky);
 
+        // Check each element in the skyline list
         pf_sky.parallel_for(0, nw_sky, [t, m, i, &insert_sky, insert, &skylines, &sky_arr](const long j) {
-            bool sky = true;
-
-            Node *prev_node_sky = NULL;
-            Node *cur_node_sky = skylines[j];
-
-            sky_arr[j] = true;
-
-            while (cur_node_sky != NULL)
-            {
-                // Remove sky node if not in window anymore or if dominated by new tuple
-                if (cur_node_sky->expire <= i || dominate(t, cur_node_sky->tuple, m))
-                {
-                    delete_node(&prev_node_sky, &cur_node_sky, &(skylines)[j]);
-                }
-                else
-                {
-                    // If new tuple is dominated by sky node then it shouldn't be put in sky
-                    // until sky node expires
-                    if (dominate(cur_node_sky->tuple, t, m))
-                    {
-                        sky_arr[j] = false;
-                        if (cur_node_sky->expire > insert)
-                        {
-                            insert_sky[j] = cur_node_sky->expire;
-                        }
-                    }
-                    // Go to next element in skyline
-                    prev_node_sky = cur_node_sky;
-                    cur_node_sky = cur_node_sky->next;
-                }
-            }
+            check_skyline(t, m, i, &insert_sky, insert, &skylines, &sky_arr, j);
         });
+
+        stop = std::chrono::high_resolution_clock::now();
+        time_f2 += duration_cast<microseconds>(stop - start).count();
 
         for (int j = 0; j < nw_sky; j++)
         {
@@ -137,9 +96,6 @@ int main(int argc, char *argv[])
             }
         }
 
-        stop = std::chrono::high_resolution_clock::now();
-        time_f2 += duration_cast<microseconds>(stop - start).count();
-
         /******** SCAN REST LIST (F3) ********/
 
         start = std::chrono::high_resolution_clock::now();
@@ -147,41 +103,8 @@ int main(int argc, char *argv[])
         vector<int> insert_rest(nw_rest);
 
         // Check each element in the Rest list
-
         pf_rest.parallel_for(0, nw_rest, [t, m, i, &insert_rest, insert, &rests, &skylines, nw_sky](const long j) {
-            Node *prev_node_rest = NULL;
-            Node *cur_node_rest = rests[j];
-            while (cur_node_rest != NULL)
-            {
-                // Remove rest node if not in window anymore or if dominated by new tuple
-                if (cur_node_rest->expire <= i || dominate(t, cur_node_rest->tuple, m))
-                {
-                    delete_node(&prev_node_rest, &cur_node_rest, &(rests)[j]);
-                }
-                else
-                {
-                    // If new tuple is dominated by rest node then it shouldn't be put in sky
-                    // until also that node expires
-                    if (dominate(cur_node_rest->tuple, t, m) && cur_node_rest->expire > insert)
-                    {
-                        insert_rest[j] = cur_node_rest->expire;
-                    }
-                    // If previous sky node keeping rest node from skyline
-                    // has expired, rest node should be moved from rest list to skyline
-                    if (cur_node_rest->insert <= i)
-                    {
-                        int rand = std::rand() % nw_sky;
-                        push_node(&(skylines)[rand], cur_node_rest->tuple, cur_node_rest->expire, 0);
-                        delete_node(&prev_node_rest, &cur_node_rest, &(rests)[j]);
-                    }
-                    // Otherwise go to the next element in rest list
-                    else
-                    {
-                        prev_node_rest = cur_node_rest;
-                        cur_node_rest = cur_node_rest->next;
-                    }
-                }
-            }
+            check_rest(t, m, i, &insert_rest, insert, &rests, &skylines, nw_sky, j);
         });
 
         stop = std::chrono::high_resolution_clock::now();
@@ -221,33 +144,8 @@ int main(int argc, char *argv[])
 
         start = std::chrono::high_resolution_clock::now();
 
-        // Wait until correct window and print only when necessary
-        if ((i >= w - 1) && verbose)
-        {
-            if ((i + 1 - w) % k == 0)
-            {
-                std::cout << "SKYLINE: ";
-                for (int j = 0; j < nw_sky; j++)
-                {
-                    if (j > 0)
-                    {
-                        std::cout << " - ";
-                    }
-                    print_node_list(skylines[j], m);
-                }
-                std::cout << "\nREST: ";
-                for (int j = 0; j < nw_rest; j++)
-                {
-                    if (j > 0)
-                    {
-                        std::cout << " - ";
-                    }
-                    print_node_list(rests[j], m);
-                }
-                std::cout << "\n"
-                          << endl;
-            }
-        }
+        print_sky_rest(&skylines, &rests, m, i, w, k, nw_sky, nw_rest, verbose);
+
         stop = std::chrono::high_resolution_clock::now();
         time_f4 += duration_cast<microseconds>(stop - start).count();
     }
