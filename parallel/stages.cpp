@@ -306,7 +306,7 @@ bool check_parameters(int argc, char *argv[])
     }
 
     // verbose must be 0 or 1
-    if (atoi(argv[6]) < 0 || atoi(argv[6]) > 1)
+    if (atoi(argv[8]) < 0 || atoi(argv[8]) > 1)
     {
         std::cout << "Verbose is either 0 or 1" << endl;
         error = true;
