@@ -102,7 +102,7 @@ void collector(vector<Node *> *DB_rest, vector<Node *> *DB_sky, int m, int w, in
 }
 
 /* Handles rest list */
-void check_rest(Node **DB_rest, vector<Node *> *DB_sky, int nw_sky, int m, stdQueue<Message *> *inputQueue, stdQueue<Message *> *outputQueue)
+void check_rest(Node **DB_rest, vector<Node *> *DB_sky, int nw_sky, int m, stdQueue<Message *> *inputQueue, stdQueue<Message *> *outputQueue, bool verbose)
 {
     int i = 0;
     Message *extracted = inputQueue->pop();
@@ -152,7 +152,9 @@ void check_rest(Node **DB_rest, vector<Node *> *DB_sky, int nw_sky, int m, stdQu
         extracted = inputQueue->pop();
         i++;
     }
-    cout << "Time f3: " << (elapsed) << " micro sec" << endl;
+    if (verbose) {
+        cout << "Time f3: " << (elapsed) << " micro sec" << endl;
+    }
     outputQueue->push(EOS);
 }
 
@@ -197,7 +199,7 @@ void connect_sky_rest(int nw_sky, int nw_rest, vector<stdQueue<Message *> *> inp
 }
 
 /* Handles skyline list */
-void check_skyline(Node **DB_sky, int m, stdQueue<int *> *inputQueue, stdQueue<Message *> *outputQueue)
+void check_skyline(Node **DB_sky, int m, stdQueue<int *> *inputQueue, stdQueue<Message *> *outputQueue, bool verbose)
 {
     int i = 0;
     int *extracted = inputQueue->pop();
@@ -245,13 +247,14 @@ void check_skyline(Node **DB_sky, int m, stdQueue<int *> *inputQueue, stdQueue<M
         extracted = inputQueue->pop();
         i++;
     }
-    cout << "Time f2: " << (elapsed) << " micro sec" << endl;
+    if (verbose) {
+        cout << "Time f2: " << (elapsed) << " micro sec" << endl;
+    }
     outputQueue->push(EOS);
 }
 
-/* Given a length l, generate an array of random integers
-of length l. If verbose the random numbers are taken
-in the range [0-99] to better compare*/
+/* Given a length l, generate an array of random integers of length l. 
+If verbose the random numbers are taken in the range [0-99] to better compare*/
 void generator(int n, int m, int w, int k, int nw_sky, bool verbose, stdQueue<int> *inputQueue, vector<stdQueue<int *> *> outputQueues)
 {
     deque<int *> window;

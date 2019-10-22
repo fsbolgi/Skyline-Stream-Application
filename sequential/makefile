@@ -9,7 +9,7 @@ $(EXE): $(OBJECTS)
 	@echo "Done Compiling All"
 
 main.o: main.cpp
-	$(CXX) $(CXXFLAGS) -c main.cpp
+	$(CXX) $(CXXFLAGS) -c main.cpp 
 	@echo "Done Compiling Main"
 
 stages.o: stages.cpp stages.hpp

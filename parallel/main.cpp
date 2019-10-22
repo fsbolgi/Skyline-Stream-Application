@@ -46,7 +46,11 @@ int main(int argc, char *argv[])
     for (int i = 0; i < nw_sky; i++)
     {
         skylines[i] = NULL;
-        sky_workers.push_back(thread(check_skyline, &(skylines[i]), m, gen_to_sky[i], sky_to_conn[i]));
+        if (i == 0) {
+            sky_workers.push_back(thread(check_skyline, &(skylines[i]), m, gen_to_sky[i], sky_to_conn[i], true));
+        } else {
+            sky_workers.push_back(thread(check_skyline, &(skylines[i]), m, gen_to_sky[i], sky_to_conn[i], false));
+        }
     }
 
     /******** CONNECT SKYLINE AND REST (F3a) ********/
@@ -70,7 +74,12 @@ int main(int argc, char *argv[])
     for (int i = 0; i < nw_rest; i++)
     {
         rests[i] = NULL;
-        rest_workers.push_back(thread(check_rest, &(rests[i]), &skylines, nw_sky, m, conn_to_rest[i], rest_to_coll[i]));
+        if (i == 0) {
+            rest_workers.push_back(thread(check_rest, &(rests[i]), &skylines, nw_sky, m, conn_to_rest[i], rest_to_coll[i], true));
+        } else {
+            rest_workers.push_back(thread(check_rest, &(rests[i]), &skylines, nw_sky, m, conn_to_rest[i], rest_to_coll[i], false));
+        }
+        
     }
 
     /******** INSERT NEW TUPLE (F4) ********/

@@ -6,14 +6,14 @@ EXE = main
 RM = rm -f
 
 $(EXE): $(OBJECTS)
-	$(CXX) $(OBJECTS) -o $(EXE) $(LDFLAGS) $(CXXFLAGS)
+	$(CXX) $(OBJECTS) -o $(EXE) $(LDFLAGS) $(CXXFLAGS) 
 	@echo "Done Compiling All"
 
 main.o: main.cpp
 	$(CXX) -c main.cpp $(LDFLAGS) $(CXXFLAGS) 
 	@echo "Done Compiling Main"
 
-stages.o: stages.cpp stages.hpp
+stages.o: stages.cpp stages.hpp ../stdQueue.hpp
 	$(CXX) -c stages.cpp $(LDFLAGS) $(CXXFLAGS)  
 	@echo "Done Compiling Stages"
 

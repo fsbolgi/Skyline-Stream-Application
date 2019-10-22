@@ -54,7 +54,6 @@ void print_window(int *t, deque<int *> *window, int m, int i, int w, int k, bool
 
 /* Handles rest list */
 void check_rest(int *t, int m, int i, vector<int> *insert_rest, int insert, vector<Node *> *rests, vector<Node *> *skylines, int nw_sky, long j)
-
 {
     Node *prev_node_rest = NULL;
     Node *cur_node_rest = (*rests)[j];
